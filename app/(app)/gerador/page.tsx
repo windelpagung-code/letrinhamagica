@@ -90,7 +90,6 @@ export default function GeradorPage() {
         if (done) break;
         const chunk = decoder.decode(value, { stream: true });
         fullText += chunk;
-        setStreamText(fullText);
       }
 
       const parsed = JSON.parse(fullText) as ActivityResult;
