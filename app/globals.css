@@ -71,3 +71,27 @@ body {
   backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.15);
 }
+
+/* ─── Print styles ───────────────────────────────── */
+@media print {
+  body * { visibility: hidden; }
+  #worksheet-print, #worksheet-print * { visibility: visible; }
+  #worksheet-print {
+    position: fixed;
+    inset: 0;
+    width: 210mm;
+    min-height: 297mm;
+    margin: 0 auto;
+    padding: 12mm 14mm;
+    background: white;
+    font-family: "Comic Sans MS", "Chalkboard SE", cursive;
+    color: #111;
+  }
+  @page { size: A4; margin: 0; }
+}
+
+@keyframes step-in {
+  from { opacity: 0; transform: translateX(-12px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.animate-step-in { animation: step-in 0.4s ease forwards; }

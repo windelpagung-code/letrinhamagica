@@ -8,6 +8,8 @@ import {
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { CATEGORIES } from "@/lib/utils";
+import GeneratorLoading from "@/components/activities/GeneratorLoading";
+import WorksheetPreview from "@/components/activities/WorksheetPreview";
 
 type Difficulty = "easy" | "medium" | "hard";
 
@@ -48,11 +50,11 @@ export default function GeradorPage() {
   });
   const [loading, setLoading] = useState(false);
   const [activity, setActivity] = useState<ActivityResult | null>(null);
-  const [streamText, setStreamText] = useState("");
   const [images, setImages] = useState<PixabayImage[]>([]);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [loadingImages, setLoadingImages] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [activeTab, setActiveTab] = useState<"detalhes" | "folha">("detalhes");
 
   async function handleGenerate(e?: React.FormEvent) {
     e?.preventDefault();
@@ -63,9 +65,9 @@ export default function GeradorPage() {
 
     setLoading(true);
     setActivity(null);
-    setStreamText("");
     setImages([]);
     setSelectedImage(null);
+    setActiveTab("detalhes");
 
     try {
       const res = await fetch("/api/generator/ai", {
@@ -93,7 +95,6 @@ export default function GeradorPage() {
 
       const parsed = JSON.parse(fullText) as ActivityResult;
       setActivity(parsed);
-      setStreamText("");
       toast.success("Atividade gerada com sucesso! 🎉");
 
       // Fetch images in background
@@ -167,7 +168,6 @@ export default function GeradorPage() {
 
   function handleReset() {
     setActivity(null);
-    setStreamText("");
     setImages([]);
     setSelectedImage(null);
   }
@@ -307,21 +307,11 @@ export default function GeradorPage() {
 
         {/* Result */}
         <div>
-          {/* Streaming preview */}
-          {streamText && !activity && (
-            <div className="bg-white rounded-2xl border border-purple-200 p-6">
-              <div className="flex items-center gap-2 mb-4">
-                <div className="w-2 h-2 rounded-full bg-purple-500 animate-pulse" />
-                <span className="text-sm font-medium text-purple-600">Gerando atividade...</span>
-              </div>
-              <pre className="text-xs text-gray-500 whitespace-pre-wrap font-mono overflow-hidden max-h-80">
-                {streamText}
-              </pre>
-            </div>
-          )}
+          {/* Loading animation */}
+          {loading && <GeneratorLoading />}
 
           {/* Empty state */}
-          {!activity && !streamText && (
+          {!activity && !loading && (
             <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl border border-purple-100 p-10 text-center h-full flex flex-col items-center justify-center min-h-80">
               <div className="text-6xl mb-4">✨</div>
               <h3 className="text-gray-700 font-bold text-lg mb-2">Pronto para criar!</h3>
@@ -363,7 +353,44 @@ export default function GeradorPage() {
                 </div>
               </div>
 
-              {/* Content */}
+              {/* Tabs */}
+              <div className="flex border-b border-gray-100">
+                <button
+                  onClick={() => setActiveTab("detalhes")}
+                  className={`flex-1 py-3 text-sm font-semibold transition-all ${
+                    activeTab === "detalhes"
+                      ? "text-purple-700 border-b-2 border-purple-600"
+                      : "text-gray-400 hover:text-gray-600"
+                  }`}
+                >
+                  📋 Detalhes
+                </button>
+                <button
+                  onClick={() => setActiveTab("folha")}
+                  className={`flex-1 py-3 text-sm font-semibold transition-all ${
+                    activeTab === "folha"
+                      ? "text-blue-700 border-b-2 border-blue-600"
+                      : "text-gray-400 hover:text-gray-600"
+                  }`}
+                >
+                  🖨️ Folha para Imprimir
+                </button>
+              </div>
+
+              {/* Tab: Worksheet */}
+              {activeTab === "folha" && (
+                <div className="p-6">
+                  <WorksheetPreview
+                    activity={activity}
+                    categoria={form.categoria}
+                    idade={form.idade}
+                    dificuldade={form.dificuldade}
+                  />
+                </div>
+              )}
+
+              {/* Tab: Details */}
+              {activeTab === "detalhes" && (
               <div className="p-6 space-y-5">
                 {/* Objetivo */}
                 <div>
@@ -508,6 +535,7 @@ export default function GeradorPage() {
                   </button>
                 </div>
               </div>
+              )}
             </div>
           )}
         </div>
