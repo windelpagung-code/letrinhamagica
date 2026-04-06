@@ -73,7 +73,7 @@ Responda APENAS com o JSON, sem markdown, sem explicações extras.`;
     model: openai("gpt-4o-mini"),
     prompt,
     temperature: 0.7,
-    maxTokens: 1500,
+    maxOutputTokens: 1500,
   });
 
   return result.toTextStreamResponse();
